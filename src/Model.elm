@@ -1,21 +1,21 @@
 module Model exposing (..)
 
+import Loc exposing (Loc)
+import Character exposing (Character)
+
+
 type Direction
     = Left
     | Right
     | Up
     | Down
 
-type alias Loc =
-    { x : Int
-    , y : Int
-    }
-
 
 type alias Model =
     { grid : List (List Loc)
     , init : { currentY : Int, currentX : Int, maxX : Int, maxY : Int, finished : Bool }
-    , currentLoc: Loc
+    , characterList: List Character
+    , playerCharacterId: Int
     }
 
 

@@ -19,7 +19,23 @@
   font-size: 8px;
 }
 
-.cell.current {
-  background: black;
+.row:nth-child(even) .cell:nth-child(even) {
+  background-color: #ffe4c4;
+}
+
+.row:nth-child(even) .cell:nth-child(odd) {
+  background-color: #ffdead;
+}
+
+.row:nth-child(odd) .cell:nth-child(odd) {
+  background-color: #ffe4c4;
+}
+
+.row:nth-child(odd) .cell:nth-child(even) {
+  background-color: #ffdead;
+}
+
+.row .cell.current {
+  background: black !important;
   color: white;
 }

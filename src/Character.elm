@@ -25,15 +25,15 @@ currentLoc characterList id =
                 currentLoc xs id
 
 
-inLoc : List Character -> Loc -> Bool
+inLoc : List Character -> Loc -> Character
 inLoc characterList loc =
     case characterList of
         [] ->
-            False
+            { id = -1, name = "", color = "", loc = { x = -1, y = -1 } }
 
         x :: xs ->
             if x.loc == loc then
-                True
+                x
 
             else
                 inLoc xs loc

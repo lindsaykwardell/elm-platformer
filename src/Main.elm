@@ -2,11 +2,12 @@ port module Main exposing (main)
 
 import Browser
 import Character exposing (Character, currentLoc)
-import Html exposing (Html, button, div, text)
-import Html.Attributes exposing (class)
-import Html.Events exposing (onClick)
+import Html exposing (Html, button, div, img, input, span, text)
+import Html.Attributes exposing (class, id, src, value)
+import Html.Events exposing (onBlur, onClick)
 import Loc exposing (Loc)
 import Model exposing (Direction(..), Model, Msg(..), StateEnvelope)
+import Html.Events exposing (onInput)
 
 
 init : () -> ( Model, Cmd Msg )
@@ -184,7 +185,7 @@ update msg model =
                 updatedCharacter =
                     { currentCharacter
                         | loc =
-                            if isWithinBounds newLoc model && Character.inLoc model.characterList newLoc == False then
+                            if isWithinBounds newLoc model && Character.hasCharacter model.characterList newLoc == False then
                                 newLoc
 
                             else
@@ -213,7 +214,7 @@ update msg model =
                 newCharacter =
                     { id = List.length model.characterList + 1
                     , loc = { x = 3, y = 3 }
-                    , name = "New Character"
+                    , name = "Player"
                     , color = "blue"
                     }
 
@@ -257,20 +258,51 @@ update msg model =
             , Cmd.none
             )
 
+        UpdateCharacterName name ->
+            let
+                character =
+                    Character.getCharacter model.characterList model.playerCharacterId
+
+                updatedCharacter =
+                    { character | name = name }
+
+                newCharacterList =
+                    List.map
+                        (\oldCharacter ->
+                            if oldCharacter.id == character.id then
+                                updatedCharacter
+
+                            else
+                                oldCharacter
+                        )
+                        model.characterList
+            in
+            ( { model
+                | characterList = newCharacterList
+              }
+            , moveCharacter updatedCharacter
+            )
+
 
 view : Model -> Html Msg
 view model =
     div []
-        [ button
-            [ onClick
-                (if List.length model.grid > 0 then
-                    AddNewCharacter
+        [ if model.playerCharacterId == 0 then
+            button
+                [ onClick
+                    (if List.length model.grid > 0 then
+                        AddNewCharacter
 
-                 else
-                    GenerateFirstCell
-                )
-            ]
-            [ text "Start" ]
+                     else
+                        GenerateFirstCell
+                    )
+                ]
+                [ text "Start" ]
+
+          else
+            div []
+                [ input [ value (Character.getCharacter model.characterList model.playerCharacterId).name, onInput UpdateCharacterName ] []
+                ]
         , div []
             (List.map
                 (displayRow model)
@@ -294,8 +326,8 @@ displayCell model loc =
         currentLoc =
             Character.currentLoc model.characterList model.playerCharacterId
 
-        hasCharacter =
-            Character.hasCharacter model.characterList loc
+        character =
+            Character.inLoc model.characterList loc
 
         playerCharacter =
             Character.getCharacter model.characterList model.playerCharacterId
@@ -307,7 +339,7 @@ displayCell model loc =
                     ++ (if currentLoc == loc then
                             " current"
 
-                        else if hasCharacter then
+                        else if character.loc == loc then
                             " character"
 
                         else
@@ -316,12 +348,17 @@ displayCell model loc =
                 )
             ]
             [ text
-                (if currentLoc == loc then
-                    playerCharacter.name
+                (if character.loc == loc then
+                    character.name
 
                  else
                     ""
                 )
+            , if playerCharacter.loc == loc then
+                div [ id "player" ] []
+
+              else
+                div [] []
             ]
 
     else

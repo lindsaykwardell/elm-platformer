@@ -32,3 +32,4 @@ type Msg
     | AddNewCharacter
     | Move Direction Bool
     | UpdateCharacter Character
+    | UpdateCharacterName String

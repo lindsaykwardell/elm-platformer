@@ -1,12 +1,12 @@
 port module Main exposing (main)
 
 import Browser
-import Character exposing (currentLoc)
+import Character exposing (Character, currentLoc)
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Loc exposing (Loc)
-import Model exposing (Direction(..), Model, Msg(..))
+import Model exposing (Direction(..), Model, Msg(..), StateEnvelope)
 
 
 init : () -> ( Model, Cmd Msg )
@@ -37,6 +37,13 @@ main =
         }
 
 
+
+-- Inbound ports
+
+
+port receiveState : (StateEnvelope -> msg) -> Sub msg
+
+
 port moveLeft : (Bool -> msg) -> Sub msg
 
 
@@ -49,6 +56,22 @@ port moveUp : (Bool -> msg) -> Sub msg
 port moveDown : (Bool -> msg) -> Sub msg
 
 
+port updateCharacter : (Character -> msg) -> Sub msg
+
+
+
+-- Outbound ports
+
+
+port initState : Model -> Cmd msg
+
+
+port addCharacter : Character -> Cmd msg
+
+
+port moveCharacter : Character -> Cmd msg
+
+
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
@@ -56,14 +79,16 @@ subscriptions _ =
         , moveRight (Move Right)
         , moveUp (Move Up)
         , moveDown (Move Down)
+        , receiveState RefreshState
+        , updateCharacter UpdateCharacter
         ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp ->
-            ( model, Cmd.none )
+        RefreshState envelope ->
+            ( { model | grid = envelope.grid, characterList = envelope.characterList }, Cmd.none )
 
         GenerateNextCell loc ->
             let
@@ -116,7 +141,7 @@ update msg model =
                     { model | init = nextInit, grid = newGrid }
             in
             if finished then
-                ( newModel, Cmd.none )
+                ( newModel, initState newModel )
 
             else
                 update (GenerateNextCell { x = nextX, y = nextY }) newModel
@@ -126,7 +151,7 @@ update msg model =
                 { model
                     | characterList =
                         [ { id = 1
-                          , loc = { x = 10, y = 10 }
+                          , loc = { x = 3, y = 3 }
                           , name = "Player"
                           , color = "red"
                           }
@@ -136,8 +161,11 @@ update msg model =
 
         Move direction _ ->
             let
+                currentCharacter =
+                    Character.getCharacter model.characterList model.playerCharacterId
+
                 currentLoc =
-                    Character.currentLoc model.characterList model.playerCharacterId
+                    currentCharacter.loc
 
                 newLoc =
                     case direction of
@@ -153,23 +181,75 @@ update msg model =
                         Right ->
                             { x = currentLoc.x, y = currentLoc.y + 1 }
 
+                updatedCharacter =
+                    { currentCharacter
+                        | loc =
+                            if isWithinBounds newLoc model && Character.inLoc model.characterList newLoc == False then
+                                newLoc
+
+                            else
+                                currentLoc
+                    }
+
                 newCharacterList =
                     List.map
                         (\character ->
                             if character.id == model.playerCharacterId then
-                                { character
-                                    | loc =
-                                        if isWithinBounds newLoc model then
-                                            newLoc
-
-                                        else
-                                            currentLoc
-                                }
+                                updatedCharacter
 
                             else
                                 character
                         )
                         model.characterList
+            in
+            ( { model
+                | characterList = newCharacterList
+              }
+            , moveCharacter updatedCharacter
+            )
+
+        AddNewCharacter ->
+            let
+                newCharacter =
+                    { id = List.length model.characterList + 1
+                    , loc = { x = 3, y = 3 }
+                    , name = "New Character"
+                    , color = "blue"
+                    }
+
+                newCharacterList =
+                    model.characterList ++ [ newCharacter ]
+            in
+            ( { model
+                | characterList = newCharacterList
+                , playerCharacterId = newCharacter.id
+              }
+            , addCharacter newCharacter
+            )
+
+        UpdateCharacter updatedCharacter ->
+            let
+                characterExists =
+                    List.any
+                        (\character ->
+                            character.id == updatedCharacter.id
+                        )
+                        model.characterList
+
+                newCharacterList =
+                    if characterExists then
+                        List.map
+                            (\oldCharacter ->
+                                if oldCharacter.id == updatedCharacter.id then
+                                    updatedCharacter
+
+                                else
+                                    oldCharacter
+                            )
+                            model.characterList
+
+                    else
+                        model.characterList ++ [ updatedCharacter ]
             in
             ( { model
                 | characterList = newCharacterList
@@ -181,7 +261,16 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ button [ onClick GenerateFirstCell ] [ text "Start" ]
+        [ button
+            [ onClick
+                (if List.length model.grid > 0 then
+                    AddNewCharacter
+
+                 else
+                    GenerateFirstCell
+                )
+            ]
+            [ text "Start" ]
         , div []
             (List.map
                 (displayRow model)
@@ -205,6 +294,9 @@ displayCell model loc =
         currentLoc =
             Character.currentLoc model.characterList model.playerCharacterId
 
+        hasCharacter =
+            Character.hasCharacter model.characterList loc
+
         playerCharacter =
             Character.getCharacter model.characterList model.playerCharacterId
     in
@@ -215,12 +307,21 @@ displayCell model loc =
                     ++ (if currentLoc == loc then
                             " current"
 
+                        else if hasCharacter then
+                            " character"
+
                         else
                             ""
                        )
                 )
             ]
-            [ text (if currentLoc == loc then playerCharacter.name else "")
+            [ text
+                (if currentLoc == loc then
+                    playerCharacter.name
+
+                 else
+                    ""
+                )
             ]
 
     else
@@ -231,24 +332,24 @@ isWithinRange : Loc -> Loc -> Model -> Bool
 isWithinRange playerLoc cellLoc model =
     let
         xRange =
-            if playerLoc.x < 10 then
-                20 - playerLoc.x
+            if playerLoc.x < 5 then
+                10 - playerLoc.x
 
-            else if playerLoc.x > model.init.maxX - 10 then
-                playerLoc.x - model.init.maxX + 20
+            else if playerLoc.x > model.init.maxX - 5 then
+                playerLoc.x - model.init.maxX + 10
 
             else
-                10
+                5
 
         yRange =
-            if playerLoc.y < 10 then
-                20 - playerLoc.y
+            if playerLoc.y < 5 then
+                10 - playerLoc.y
 
-            else if playerLoc.y > model.init.maxY - 10 then
-                playerLoc.y - model.init.maxY + 20
+            else if playerLoc.y > model.init.maxY - 5 then
+                playerLoc.y - model.init.maxY + 10
 
             else
-                10
+                5
     in
     abs (playerLoc.x - cellLoc.x)
         <= xRange

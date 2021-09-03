@@ -1,7 +1,7 @@
 module Model exposing (..)
 
-import Loc exposing (Loc)
 import Character exposing (Character)
+import Loc exposing (Loc)
 
 
 type Direction
@@ -14,13 +14,21 @@ type Direction
 type alias Model =
     { grid : List (List Loc)
     , init : { currentY : Int, currentX : Int, maxX : Int, maxY : Int, finished : Bool }
-    , characterList: List Character
-    , playerCharacterId: Int
+    , characterList : List Character
+    , playerCharacterId : Int
+    }
+
+
+type alias StateEnvelope =
+    { grid : List (List Loc)
+    , characterList : List Character
     }
 
 
 type Msg
-    = NoOp
+    = RefreshState StateEnvelope
     | GenerateNextCell Loc
     | GenerateFirstCell
+    | AddNewCharacter
     | Move Direction Bool
+    | UpdateCharacter Character

@@ -39,3 +39,7 @@
   background: black !important;
   color: white;
 }
+
+.row .cell.character {
+  background: green !important;
+}

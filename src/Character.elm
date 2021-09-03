@@ -25,6 +25,20 @@ currentLoc characterList id =
                 currentLoc xs id
 
 
+inLoc : List Character -> Loc -> Bool
+inLoc characterList loc =
+    case characterList of
+        [] ->
+            False
+
+        x :: xs ->
+            if x.loc == loc then
+                True
+
+            else
+                inLoc xs loc
+
+
 getCharacter : List Character -> Int -> Character
 getCharacter characterList id =
     case characterList of
@@ -37,3 +51,17 @@ getCharacter characterList id =
 
             else
                 getCharacter xs id
+
+
+hasCharacter : List Character -> Loc -> Bool
+hasCharacter characterList loc =
+    case characterList of
+        [] ->
+            False
+
+        x :: xs ->
+            if x.loc == loc then
+                True
+
+            else
+                hasCharacter xs loc

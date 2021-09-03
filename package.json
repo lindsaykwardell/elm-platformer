@@ -1,8 +1,8 @@
 {
-  "name": "vite-elm-template",
+  "name": "elm-platformer",
   "author": "Lindsay Wardell",
-  "description": "A staring template for building Elm apps with Vite",
-  "version": "1.0.1",
+  "description": "Experiment with Elm to build a platformer",
+  "version": "0.0.1",
   "license": "MIT",
   "scripts": {
     "postinstall": "elm-tooling install",

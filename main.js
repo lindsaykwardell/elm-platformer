@@ -42,10 +42,7 @@ socket.on("updateCharacter", (character) => {
 });
 
 app.ports.initState.subscribe((state) => {
-  socket.emit("initGame", {
-    grid: state.grid,
-    characterList: state.characterList,
-  });
+  socket.emit("initGame", state);
 });
 
 app.ports.moveCharacter.subscribe((character) => {

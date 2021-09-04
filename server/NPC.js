@@ -3,14 +3,24 @@ const faker = require("faker");
 
 module.exports = class NPC {
   constructor(game) {
+    function generateLoc() {
+      const loc = {
+        x: Math.floor(Math.random() * 10),
+        y: Math.floor(Math.random() * 10),
+      }
+
+      if (game.isLocationOccupied(loc)) {
+        return generateLoc();
+      }
+
+      return loc;
+    }
+
     this.game = game;
     this.id = uuid();
     this.color = "pink";
     this.name = faker.name.firstName();
-    this.loc = {
-      x: Math.floor(Math.random() * 10),
-      y: Math.floor(Math.random() * 10),
-    };
+    this.loc = generateLoc();
 
     this.game.addCharacter(this.character);
 
@@ -18,7 +28,7 @@ module.exports = class NPC {
   }
 
   get character() {
-    return {  
+    return {
       id: this.id,
       name: this.name,
       color: this.color,
@@ -61,8 +71,10 @@ module.exports = class NPC {
       newLoc.y = 0;
     }
 
-    this.loc = newLoc;
+    if (!this.game.isLocationOccupied(newLoc)) {
+      this.loc = newLoc;
 
-    this.game.moveCharacter(this.character);
+      this.game.moveCharacter(this.character);
+    }
   }
 };

@@ -45,3 +45,8 @@
   background: green !important;
   color: white;
 }
+
+.row .cell.structure {
+  background: brown !important;
+  color: white;
+}

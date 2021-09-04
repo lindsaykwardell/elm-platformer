@@ -7,6 +7,7 @@ import Html.Attributes exposing (class, id, src, value)
 import Html.Events exposing (onBlur, onClick, onInput)
 import Loc exposing (Loc)
 import Model exposing (Direction(..), Model, Msg(..), StateEnvelope)
+import Structure exposing (Structure)
 
 
 init : () -> ( Model, Cmd Msg )
@@ -21,6 +22,12 @@ init _ =
             , finished = False
             }
       , characterList = []
+      , structureList =
+            [ { name = "Structure 1"
+              , startLoc = { x = 5, y = 5 }
+              , endLoc = { x = 10, y = 8 }
+              }
+            ]
       , playerCharacterId = ""
       }
     , Cmd.none
@@ -190,7 +197,7 @@ update msg model =
                 updatedCharacter =
                     { currentCharacter
                         | loc =
-                            if isWithinBounds newLoc model && Character.hasCharacter model.characterList newLoc == False then
+                            if isWithinBounds newLoc model && Character.hasCharacter model.characterList newLoc == False && Structure.existsInLoc model.structureList newLoc == False then
                                 newLoc
 
                             else
@@ -331,6 +338,9 @@ displayCell model loc =
         currentLoc =
             Character.currentLoc model.characterList model.playerCharacterId
 
+        hasStructure =
+            Structure.existsInLoc model.structureList loc
+
         character =
             Character.inLoc model.characterList loc
 
@@ -341,7 +351,10 @@ displayCell model loc =
         div
             [ class
                 ("cell"
-                    ++ (if currentLoc == loc then
+                    ++ (if hasStructure then
+                            " structure"
+
+                        else if currentLoc == loc then
                             " current"
 
                         else if character.loc == loc then

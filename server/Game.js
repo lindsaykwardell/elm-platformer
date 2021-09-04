@@ -25,8 +25,16 @@ module.exports = class Game {
     console.log(this.gameState?.characterList);
 
     // Spawn two NPCs
-    const npc1 = new NPC(this);
-    const npc2 = new NPC(this);
+    new NPC(this);
+    new NPC(this);
+    new NPC(this);
+    new NPC(this);
+    new NPC(this);
+    new NPC(this);
+    new NPC(this);
+    new NPC(this);
+    new NPC(this);
+    new NPC(this);
   }
 
   addCharacter(character) {
@@ -61,5 +69,17 @@ module.exports = class Game {
 
   getLocation(characterId) {
     return this.gameState.characterList.find((c) => c.id === characterId).loc;
+  }
+
+  hasCharacter(loc) {
+    return this.gameState.characterList.some((c) => c.loc.x === loc.x && c.loc.y === loc.y);
+  }
+
+  hasStructure(loc) {
+    return this.gameState.structureList.some((s) => s.startLoc.x <= loc.x && s.endLoc.x >= loc.x && s.startLoc.y <= loc.y && s.endLoc.y >= loc.y);
+  }
+
+  isLocationOccupied(loc) {
+    return this.hasCharacter(loc) || this.hasStructure(loc);
   }
 };

@@ -2,6 +2,7 @@ module Model exposing (..)
 
 import Character exposing (Character)
 import Loc exposing (Loc)
+import Structure exposing (Structure)
 
 
 type Direction
@@ -15,6 +16,7 @@ type alias Model =
     { grid : List (List Loc)
     , init : { currentY : Int, currentX : Int, maxX : Int, maxY : Int, finished : Bool }
     , characterList : List Character
+    , structureList : List Structure
     , playerCharacterId : String
     }
 

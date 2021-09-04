@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/socket.io": {
-        target: "http://localhost:3030/socket.io",
+        target: "http://localhost:3030",
         changeOrigin: true,
         pathRewrite: { "^/socket.io": "" },
       },

@@ -21,8 +21,8 @@ window.addEventListener("keydown", function (e) {
   }
 });
 
-const socket = io(window.location.origin, {
-  path: "/socket.io",
+const socket = io(import.meta.env.BASE_URL, {
+  path: import.meta.env.DEV ? "/socket.io" : "",
 });
 
 socket.on("connect", () => {

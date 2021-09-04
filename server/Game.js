@@ -6,6 +6,7 @@ module.exports = class Game {
     this.io = io;
     this.gameState = null;
     this.connections = [];
+    this.npcList = [];
 
     this.io.on("connection", (socket) => {
       let characterId = uuid();
@@ -26,42 +27,57 @@ module.exports = class Game {
     });
   }
 
+  get maxX() {
+    return this.gameState?.init.maxX;
+  }
+
+  get maxY() {
+    return this.gameState?.init.maxY;
+  }
+
   initGame(msg) {
     this.gameState = msg;
 
-    // Spawn two NPCs
-    for (let index = 0; index < Math.floor( Math.random() * 30); index++) {
-      new NPC(this);
+    // Spawn NPCs
+    for (let index = 0; index < 50; index++) {
+      this.npcList.push(new NPC(this));
     }
   }
 
   addCharacter(character) {
-    console.log("adding a character", character);
     this.gameState.characterList.push(character);
-    console.log(this.gameState?.characterList);
 
     this.io.emit("updateCharacter", character);
   }
 
   moveCharacter(character) {
-    console.log("moving a character", character);
-    this.gameState.characterList = this.gameState.characterList.filter(
-      (c) => c.id !== character.id
-    );
-    this.gameState.characterList.push(character);
-    console.log(this.gameState?.characterList);
+    this.gameState.characterList = this.gameState.characterList.map((c) => {
+      if (c.id === character.id) {
+        return character;
+      }
+      return c;
+    });
 
-    this.io.emit("updateCharacter", character);
+    const connectionId = this.connections.find(
+      (c) => c.characterId === character.id
+    )?.id;
+
+    this.io.except(connectionId).emit("updateCharacter", character);
   }
 
   sendMsg(msg) {
-    console.log("sending msg", msg);
     this.gameState.characterList.forEach((character) => {
       if (this.inChatRange(character.id, msg.id)) {
-        const socketId = this.connections.find(
-          (c) => c.characterId === character.id
-        )?.id;
-        this.io.to(socketId).emit("chatMsg", msg);
+        const npc = this.npcList.find((n) => n.id === character.id);
+
+        if (!npc) {
+          const socketId = this.connections.find(
+            (c) => c.characterId === character.id
+          )?.id;
+          this.io.to(socketId).emit("chatMsg", msg);
+        } else {
+          npc.receiveMsg(msg);
+        }
       }
     });
   }
@@ -76,6 +92,10 @@ module.exports = class Game {
       (c) => c.characterId !== characterId
     );
     this.io.emit("gameState", this.gameState);
+  }
+
+  getCharacter(characterId) {
+    return this.gameState?.characterList.find((c) => c.id === characterId);
   }
 
   getLocation(characterId) {

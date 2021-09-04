@@ -6,9 +6,9 @@ module.exports = class NPC {
   constructor(game) {
     function generateLoc() {
       const loc = {
-        x: Math.floor(Math.random() * 10),
-        y: Math.floor(Math.random() * 10),
-      }
+        x: Math.floor(Math.random() * game.maxX),
+        y: Math.floor(Math.random() * game.maxY),
+      };
 
       if (game.isLocationOccupied(loc)) {
         return generateLoc();
@@ -22,7 +22,7 @@ module.exports = class NPC {
     this.color = "pink";
     this.name = pokemon.random();
     this.loc = generateLoc();
-    this.direction = "Down"
+    this.direction = "Down";
 
     this.game.addCharacter(this.character);
 
@@ -36,7 +36,7 @@ module.exports = class NPC {
       name: this.name,
       color: this.color,
       loc: this.loc,
-      direction: this.direction
+      direction: this.direction,
     };
   }
 
@@ -94,6 +94,41 @@ module.exports = class NPC {
   }
 
   sendMsg() {
-    this.game.sendMsg({id: this.id, msg: faker.hacker.phrase()});
+    const hailPlayer = Math.floor(Math.random() * 2);
+    if (hailPlayer) {
+      const inRangeCharacters = this.game.gameState.characterList.filter(
+        (character) => {
+          return this.game.inChatRange(this.id, character.id);
+        }
+      );
+      const chosenCharacter =
+        inRangeCharacters[Math.floor(Math.random() * inRangeCharacters.length)];
+      this.game.sendMsg({
+        id: this.id,
+        msg: `${chosenCharacter.name}! ${faker.hacker.phrase()}`,
+      });
+    } else {
+      this.game.sendMsg({ id: this.id, msg: faker.hacker.phrase() });
+    }
+  }
+
+  receiveMsg(msg) {
+    if (msg.msg.includes(this.name) && msg.id !== this.id) {
+      const sender = this.game.getCharacter(msg.id);
+      const response = faker.hacker.phrase();
+
+      const shouldRespond = Math.floor(Math.random() * 2);
+
+      if (shouldRespond) {
+        setTimeout(() => {
+          this.game.sendMsg({
+            id: this.id,
+            msg: `${response.substring(0, response.length - 1)}, ${
+              sender.name
+            }!`,
+          });
+        }, 750);
+      }
+    }
   }
 };

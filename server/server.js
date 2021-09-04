@@ -8,6 +8,8 @@ const Game = require("./Game");
 
 const game = new Game(io);
 
+app.use(express.static("dist"));
+
 app.get("/", (req, res) => {
   res.sendStatus(200);
 });

@@ -3,7 +3,7 @@ port module Main exposing (main)
 import Browser
 import Character exposing (Character, Direction(..), currentLoc)
 import Html exposing (Html, button, div, img, input, span, text)
-import Html.Attributes exposing (class, id, src, value)
+import Html.Attributes exposing (class, id, src, style, value)
 import Html.Events exposing (onBlur, onClick, onInput)
 import Loc exposing (Loc)
 import Model exposing (ChatMsg, Model, Msg(..), StateEnvelope)
@@ -26,6 +26,26 @@ init _ =
             [ { name = "Structure 1"
               , startLoc = { x = 5, y = 5 }
               , endLoc = { x = 10, y = 8 }
+              }
+            , { name = "Structure 2"
+              , startLoc = { x = 13, y = 5 }
+              , endLoc = { x = 18, y = 8 }
+              }
+            , { name = "Structure 3"
+              , startLoc = { x = 21, y = 5 }
+              , endLoc = { x = 26, y = 8 }
+              }
+            , { name = "Structure 4"
+              , startLoc = { x = 5, y = 13 }
+              , endLoc = { x = 10, y = 16 }
+              }
+            , { name = "Structure 5"
+              , startLoc = { x = 13, y = 13 }
+              , endLoc = { x = 18, y = 16 }
+              }
+            , { name = "Structure 6"
+              , startLoc = { x = 21, y = 13 }
+              , endLoc = { x = 26, y = 16 }
               }
             ]
       , playerCharacterId = ""
@@ -355,11 +375,18 @@ view model =
             div []
                 [ input [ value (Character.getCharacter model.characterList model.playerCharacterId).name, onInput UpdateCharacterName ] []
                 ]
-        , div []
-            (List.map
-                (displayRow model)
-                model.grid
-            )
+        , div [ style "display" "flex", style "justify-content" "space-between" ]
+            [ div []
+                (List.map
+                    (displayRow model False)
+                    model.grid
+                )
+            , div []
+                (List.map
+                    (displayRow model True)
+                    model.grid
+                )
+            ]
         , div [ class "chat" ]
             (List.map
                 (\msg -> div [] [ text (Character.getCharacter model.characterList msg.id).name, text ": ", text msg.msg ])
@@ -372,17 +399,17 @@ view model =
         ]
 
 
-displayRow : Model -> List Loc -> Html Msg
-displayRow model row =
+displayRow : Model -> Bool -> List Loc -> Html Msg
+displayRow model isSmall row =
     div [ class "row" ]
         (List.map
-            (displayCell model)
+            (displayCell model isSmall)
             row
         )
 
 
-displayCell : Model -> Loc -> Html Msg
-displayCell model loc =
+displayCell : Model -> Bool -> Loc -> Html Msg
+displayCell model isSmall loc =
     let
         currentLoc =
             Character.currentLoc model.characterList model.playerCharacterId
@@ -392,14 +419,17 @@ displayCell model loc =
 
         character =
             Character.inLoc model.characterList loc
-
-        playerCharacter =
-            Character.getCharacter model.characterList model.playerCharacterId
     in
-    if isWithinRange currentLoc loc model then
+    if isSmall || isWithinRange currentLoc loc model then
         div
             [ class
                 ("cell"
+                    ++ (if isSmall then
+                            " sm"
+
+                        else
+                            ""
+                       )
                     ++ (if hasStructure then
                             " structure"
 
@@ -414,37 +444,42 @@ displayCell model loc =
                        )
                 )
             ]
-            [ text
-                (if character.loc == loc then
-                    character.name
+            (if isSmall then
+                []
 
-                 else
-                    ""
-                )
-            , div [ class "direction " ]
+             else
                 [ text
                     (if character.loc == loc then
-                        case character.direction of
-                            "Down" ->
-                                "⇩"
-
-                            "Up" ->
-                                "⇧"
-
-                            "Left" ->
-                                "⇦"
-
-                            "Right" ->
-                                "⇨"
-
-                            _ ->
-                                ""
+                        character.name
 
                      else
                         ""
                     )
+                , div [ class "direction " ]
+                    [ text
+                        (if character.loc == loc then
+                            case character.direction of
+                                "Down" ->
+                                    "⇩"
+
+                                "Up" ->
+                                    "⇧"
+
+                                "Left" ->
+                                    "⇦"
+
+                                "Right" ->
+                                    "⇨"
+
+                                _ ->
+                                    ""
+
+                         else
+                            ""
+                        )
+                    ]
                 ]
-            ]
+            )
 
     else
         div [] []

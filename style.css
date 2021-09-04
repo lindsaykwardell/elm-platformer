@@ -20,6 +20,12 @@
   text-align: center;
 }
 
+.cell.sm {
+  height: 3px;
+  width: 3px;
+  border: none;
+}
+
 .row:nth-child(even) .cell:nth-child(even) {
   background-color: #ffe4c4;
 }
@@ -37,7 +43,7 @@
 }
 
 .row .cell.current {
-  background-color: black !important;;
+  background-color: black !important;
   color: white;
 }
 

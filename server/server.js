@@ -14,6 +14,6 @@ app.get("/", (req, res) => {
   res.sendStatus(200);
 });
 
-server.listen(3030, () => {
-  console.log("listening on *:3030");
+server.listen(process.env.PORT || 3030, () => {
+  console.log("listening on *:" + process.env.PORT || 3030);
 });

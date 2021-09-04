@@ -4,10 +4,9 @@ import Browser
 import Character exposing (Character, currentLoc)
 import Html exposing (Html, button, div, img, input, span, text)
 import Html.Attributes exposing (class, id, src, value)
-import Html.Events exposing (onBlur, onClick)
+import Html.Events exposing (onBlur, onClick, onInput)
 import Loc exposing (Loc)
 import Model exposing (Direction(..), Model, Msg(..), StateEnvelope)
-import Html.Events exposing (onInput)
 
 
 init : () -> ( Model, Cmd Msg )
@@ -22,7 +21,7 @@ init _ =
             , finished = False
             }
       , characterList = []
-      , playerCharacterId = 0
+      , playerCharacterId = ""
       }
     , Cmd.none
     )
@@ -43,6 +42,9 @@ main =
 
 
 port receiveState : (StateEnvelope -> msg) -> Sub msg
+
+
+port getPlayerCharacterId : (String -> msg) -> Sub msg
 
 
 port moveLeft : (Bool -> msg) -> Sub msg
@@ -81,6 +83,7 @@ subscriptions _ =
         , moveUp (Move Up)
         , moveDown (Move Down)
         , receiveState RefreshState
+        , getPlayerCharacterId GetPlayerCharacterId
         , updateCharacter UpdateCharacter
         ]
 
@@ -88,6 +91,9 @@ subscriptions _ =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        GetPlayerCharacterId id ->
+            ( { model | playerCharacterId = id }, Cmd.none )
+
         RefreshState envelope ->
             ( { model | grid = envelope.grid, characterList = envelope.characterList }, Cmd.none )
 
@@ -151,13 +157,12 @@ update msg model =
             update (GenerateNextCell { x = 0, y = 0 })
                 { model
                     | characterList =
-                        [ { id = 1
+                        [ { id = model.playerCharacterId
                           , loc = { x = 3, y = 3 }
                           , name = "Player"
                           , color = "red"
                           }
                         ]
-                    , playerCharacterId = 1
                 }
 
         Move direction _ ->
@@ -211,8 +216,9 @@ update msg model =
 
         AddNewCharacter ->
             let
+                newCharacter : Character
                 newCharacter =
-                    { id = List.length model.characterList + 1
+                    { id = model.playerCharacterId
                     , loc = { x = 3, y = 3 }
                     , name = "Player"
                     , color = "blue"
@@ -223,7 +229,6 @@ update msg model =
             in
             ( { model
                 | characterList = newCharacterList
-                , playerCharacterId = newCharacter.id
               }
             , addCharacter newCharacter
             )
@@ -287,7 +292,7 @@ update msg model =
 view : Model -> Html Msg
 view model =
     div []
-        [ if model.playerCharacterId == 0 then
+        [ if (Character.getCharacter model.characterList model.playerCharacterId).id == "" then
             button
                 [ onClick
                     (if List.length model.grid > 0 then

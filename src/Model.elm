@@ -15,7 +15,7 @@ type alias Model =
     { grid : List (List Loc)
     , init : { currentY : Int, currentX : Int, maxX : Int, maxY : Int, finished : Bool }
     , characterList : List Character
-    , playerCharacterId : Int
+    , playerCharacterId : String
     }
 
 
@@ -26,7 +26,8 @@ type alias StateEnvelope =
 
 
 type Msg
-    = RefreshState StateEnvelope
+    = GetPlayerCharacterId String
+    | RefreshState StateEnvelope
     | GenerateNextCell Loc
     | GenerateFirstCell
     | AddNewCharacter

@@ -33,6 +33,10 @@ socket.on("gameState", (state) => {
   if (state) app.ports.receiveState.send(state);
 });
 
+socket.on("characterId", id => {
+  app.ports.getPlayerCharacterId.send(id);
+})
+
 socket.on("updateCharacter", (character) => {
   app.ports.updateCharacter.send(character);
 });

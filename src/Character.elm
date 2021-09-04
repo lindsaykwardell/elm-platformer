@@ -4,14 +4,14 @@ import Loc exposing (Loc)
 
 
 type alias Character =
-    { id : Int
+    { id : String
     , name : String
     , color : String
     , loc : Loc
     }
 
 
-currentLoc : List Character -> Int -> Loc
+currentLoc : List Character -> String -> Loc
 currentLoc characterList id =
     case characterList of
         [] ->
@@ -29,7 +29,7 @@ inLoc : List Character -> Loc -> Character
 inLoc characterList loc =
     case characterList of
         [] ->
-            { id = -1, name = "", color = "", loc = { x = -1, y = -1 } }
+            { id = "", name = "", color = "", loc = { x = -1, y = -1 } }
 
         x :: xs ->
             if x.loc == loc then
@@ -39,11 +39,11 @@ inLoc characterList loc =
                 inLoc xs loc
 
 
-getCharacter : List Character -> Int -> Character
+getCharacter : List Character -> String -> Character
 getCharacter characterList id =
     case characterList of
         [] ->
-            { id = -1, name = "", color = "", loc = { x = -1, y = -1 } }
+            { id = "", name = "", color = "", loc = { x = -1, y = -1 } }
 
         x :: xs ->
             if id == x.id then

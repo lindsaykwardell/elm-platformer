@@ -33,13 +33,17 @@ socket.on("gameState", (state) => {
   if (state) app.ports.receiveState.send(state);
 });
 
-socket.on("characterId", id => {
+socket.on("characterId", (id) => {
   app.ports.getPlayerCharacterId.send(id);
-})
+});
 
 socket.on("updateCharacter", (character) => {
   app.ports.updateCharacter.send(character);
 });
+
+socket.on("chatMsg", msg => {
+  app.ports.receiveChatMsg.send(msg);
+})
 
 app.ports.initState.subscribe((state) => {
   socket.emit("initGame", state);
@@ -51,4 +55,8 @@ app.ports.moveCharacter.subscribe((character) => {
 
 app.ports.addCharacter.subscribe((character) => {
   socket.emit("addCharacter", character);
+});
+
+app.ports.sendChatMsg.subscribe((msg) => {
+  socket.emit("chatMsg", msg);
 });

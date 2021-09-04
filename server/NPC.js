@@ -1,5 +1,6 @@
 const uuid = require("uuid").v4;
 const faker = require("faker");
+const pokemon = require("pokemon");
 
 module.exports = class NPC {
   constructor(game) {
@@ -19,12 +20,13 @@ module.exports = class NPC {
     this.game = game;
     this.id = uuid();
     this.color = "pink";
-    this.name = faker.name.firstName();
+    this.name = pokemon.random();
     this.loc = generateLoc();
 
     this.game.addCharacter(this.character);
 
     this.scheduleMove();
+    this.scheduleMsg();
   }
 
   get character() {
@@ -76,5 +78,16 @@ module.exports = class NPC {
 
       this.game.moveCharacter(this.character);
     }
+  }
+
+  scheduleMsg() {
+    setTimeout(() => {
+      this.sendMsg();
+      this.scheduleMsg();
+    }, Math.floor(Math.random() * 20000));
+  }
+
+  sendMsg() {
+    this.game.sendMsg({id: this.id, msg: faker.hacker.phrase()});
   }
 };

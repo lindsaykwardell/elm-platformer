@@ -50,3 +50,17 @@
   background: brown !important;
   color: white;
 }
+
+.chat {
+  width: 100%;
+  height: 300px;
+  overflow: auto;
+  border: solid thin #999;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.chat input {
+  width: 100%;
+}

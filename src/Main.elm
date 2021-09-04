@@ -6,7 +6,7 @@ import Html exposing (Html, button, div, img, input, span, text)
 import Html.Attributes exposing (class, id, src, value)
 import Html.Events exposing (onBlur, onClick, onInput)
 import Loc exposing (Loc)
-import Model exposing (Direction(..), Model, Msg(..), StateEnvelope)
+import Model exposing (ChatMsg, Direction(..), Model, Msg(..), StateEnvelope)
 import Structure exposing (Structure)
 
 
@@ -29,6 +29,8 @@ init _ =
               }
             ]
       , playerCharacterId = ""
+      , chatLog = []
+      , chatInput = ""
       }
     , Cmd.none
     )
@@ -69,6 +71,9 @@ port moveDown : (Bool -> msg) -> Sub msg
 port updateCharacter : (Character -> msg) -> Sub msg
 
 
+port receiveChatMsg : (ChatMsg -> msg) -> Sub msg
+
+
 
 -- Outbound ports
 
@@ -82,6 +87,9 @@ port addCharacter : Character -> Cmd msg
 port moveCharacter : Character -> Cmd msg
 
 
+port sendChatMsg : ChatMsg -> Cmd msg
+
+
 subscriptions : Model -> Sub Msg
 subscriptions _ =
     Sub.batch
@@ -92,6 +100,7 @@ subscriptions _ =
         , receiveState RefreshState
         , getPlayerCharacterId GetPlayerCharacterId
         , updateCharacter UpdateCharacter
+        , receiveChatMsg ReceiveChatMsg
         ]
 
 
@@ -295,6 +304,20 @@ update msg model =
             , moveCharacter updatedCharacter
             )
 
+        InputChat chatInput ->
+            ( { model | chatInput = chatInput }, Cmd.none )
+
+        SendChatMsg ->
+            ( { model | chatInput = "" }
+            , sendChatMsg
+                { id = model.playerCharacterId
+                , msg = model.chatInput
+                }
+            )
+
+        ReceiveChatMsg chatMsg ->
+            ( { model | chatLog = model.chatLog ++ [ chatMsg ] }, Cmd.none )
+
 
 view : Model -> Html Msg
 view model =
@@ -319,6 +342,15 @@ view model =
             (List.map
                 (displayRow model)
                 model.grid
+            )
+        , div [ class "chat" ]
+            (List.map
+                (\msg -> div [] [ text (Character.getCharacter model.characterList msg.id).name, text ": ", text msg.msg ])
+                model.chatLog
+                ++ [ div []
+                        [ input [ onInput InputChat ] [] ]
+                   , button [ onClick SendChatMsg ] [ text "Send" ]
+                   ]
             )
         ]
 

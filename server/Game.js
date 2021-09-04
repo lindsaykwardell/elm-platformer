@@ -1,4 +1,5 @@
 const uuid = require("uuid").v4;
+const NPC = require("./NPC");
 
 module.exports = class Game {
   constructor(io) {
@@ -22,6 +23,10 @@ module.exports = class Game {
   initGame(msg) {
     this.gameState = msg;
     console.log(this.gameState?.characterList);
+
+    // Spawn two NPCs
+    const npc1 = new NPC(this);
+    const npc2 = new NPC(this);
   }
 
   addCharacter(character) {
@@ -52,5 +57,9 @@ module.exports = class Game {
     }
     console.log(this.gameState?.characterList);
     this.io.emit("gameState", this.gameState);
+  }
+
+  getLocation(characterId) {
+    return this.gameState.characterList.find((c) => c.id === characterId).loc;
   }
 };

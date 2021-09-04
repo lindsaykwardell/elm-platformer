@@ -8,6 +8,7 @@
     "postinstall": "elm-tooling install",
     "dev": "start-server-and-test start-server http://localhost:3030 vite",
     "start-server": "nodemon ./server/server.js",
+    "start": "node ./server/server.js",
     "prebuild": "elm-tooling install",
     "build": "vite build",
     "serve": "vite preview"

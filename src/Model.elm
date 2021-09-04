@@ -3,13 +3,8 @@ module Model exposing (..)
 import Character exposing (Character)
 import Loc exposing (Loc)
 import Structure exposing (Structure)
+import Character exposing (Direction)
 
-
-type Direction
-    = Left
-    | Right
-    | Up
-    | Down
 
 
 type alias ChatMsg =

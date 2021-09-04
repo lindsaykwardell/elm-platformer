@@ -22,6 +22,7 @@ module.exports = class NPC {
     this.color = "pink";
     this.name = pokemon.random();
     this.loc = generateLoc();
+    this.direction = "Down"
 
     this.game.addCharacter(this.character);
 
@@ -35,6 +36,7 @@ module.exports = class NPC {
       name: this.name,
       color: this.color,
       loc: this.loc,
+      direction: this.direction
     };
   }
 
@@ -54,15 +56,19 @@ module.exports = class NPC {
     switch (roll) {
       case 0:
         newLoc.x--;
+        this.direction = "Up";
         break;
       case 1:
         newLoc.x++;
+        this.direction = "Down";
         break;
       case 2:
         newLoc.y--;
+        this.direction = "Left";
         break;
       case 3:
         newLoc.y++;
+        this.direction = "Right";
         break;
     }
 

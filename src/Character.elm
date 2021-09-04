@@ -3,11 +3,19 @@ module Character exposing (..)
 import Loc exposing (Loc)
 
 
+type Direction
+    = Left
+    | Right
+    | Up
+    | Down
+
+
 type alias Character =
     { id : String
     , name : String
     , color : String
     , loc : Loc
+    , direction : String
     }
 
 
@@ -29,7 +37,7 @@ inLoc : List Character -> Loc -> Character
 inLoc characterList loc =
     case characterList of
         [] ->
-            { id = "", name = "", color = "", loc = { x = -1, y = -1 } }
+            { id = "", name = "", color = "", loc = { x = -1, y = -1 }, direction = "Down" }
 
         x :: xs ->
             if x.loc == loc then
@@ -43,7 +51,7 @@ getCharacter : List Character -> String -> Character
 getCharacter characterList id =
     case characterList of
         [] ->
-            { id = "", name = "", color = "", loc = { x = -1, y = -1 } }
+            { id = "", name = "", color = "", loc = { x = -1, y = -1 }, direction = "Down" }
 
         x :: xs ->
             if id == x.id then

@@ -1,13 +1,13 @@
 port module Main exposing (main)
 
 import Browser
-import Character exposing (Character, currentLoc)
+import Character exposing (Character, Direction(..), currentLoc)
 import Html exposing (Html, button, div, img, input, span, text)
 import Html.Attributes exposing (class, id, src, value)
 import Html.Events exposing (onBlur, onClick, onInput)
 import Loc exposing (Loc)
-import Model exposing (ChatMsg, Direction(..), Model, Msg(..), StateEnvelope)
-import Structure exposing (Structure)
+import Model exposing (ChatMsg, Model, Msg(..), StateEnvelope)
+import Structure
 
 
 init : () -> ( Model, Cmd Msg )
@@ -177,6 +177,7 @@ update msg model =
                           , loc = { x = 3, y = 3 }
                           , name = "Player"
                           , color = "red"
+                          , direction = "Down"
                           }
                         ]
                 }
@@ -203,6 +204,20 @@ update msg model =
                         Right ->
                             { x = currentLoc.x, y = currentLoc.y + 1 }
 
+                newDirection =
+                    case direction of
+                        Up ->
+                            "Up"
+
+                        Down ->
+                            "Down"
+
+                        Left ->
+                            "Left"
+
+                        Right ->
+                            "Right"
+
                 updatedCharacter =
                     { currentCharacter
                         | loc =
@@ -211,6 +226,7 @@ update msg model =
 
                             else
                                 currentLoc
+                        , direction = newDirection
                     }
 
                 newCharacterList =
@@ -238,6 +254,7 @@ update msg model =
                     , loc = { x = 3, y = 3 }
                     , name = "Player"
                     , color = "blue"
+                    , direction = "Down"
                     }
 
                 newCharacterList =
@@ -404,11 +421,29 @@ displayCell model loc =
                  else
                     ""
                 )
-            , if playerCharacter.loc == loc then
-                div [ id "player" ] []
+            , div [ class "direction " ]
+                [ text
+                    (if character.loc == loc then
+                        case character.direction of
+                            "Down" ->
+                                "⇩"
 
-              else
-                div [] []
+                            "Up" ->
+                                "⇧"
+
+                            "Left" ->
+                                "⇦"
+
+                            "Right" ->
+                                "⇨"
+
+                            _ ->
+                                ""
+
+                     else
+                        ""
+                    )
+                ]
             ]
 
     else

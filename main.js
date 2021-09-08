@@ -41,9 +41,13 @@ socket.on("updateCharacter", (character) => {
   app.ports.updateCharacter.send(character);
 });
 
-socket.on("chatMsg", msg => {
+socket.on("chatMsg", (msg) => {
   app.ports.receiveChatMsg.send(msg);
-})
+  setTimeout(() => {
+    var objDiv = document.querySelector(".chat");
+    objDiv.scrollTop = objDiv.scrollHeight;
+  }, 1);
+});
 
 app.ports.initState.subscribe((state) => {
   socket.emit("initGame", state);

@@ -4,7 +4,9 @@ import Browser
 import Character exposing (Character, Direction(..), currentLoc)
 import Html exposing (Html, button, div, img, input, span, text)
 import Html.Attributes exposing (class, id, src, style, value)
-import Html.Events exposing (onBlur, onClick, onInput)
+import Html.Events exposing (on, onBlur, onClick, onInput)
+import Json.Decode as Decode
+import Keyboard.Event exposing (KeyCode, decodeKeyboardEvent)
 import Loc exposing (Loc)
 import Model exposing (ChatMsg, Model, Msg(..), StateEnvelope)
 import Structure
@@ -355,6 +357,27 @@ update msg model =
         ReceiveChatMsg chatMsg ->
             ( { model | chatLog = model.chatLog ++ [ chatMsg ] }, Cmd.none )
 
+        HandleKeyboardEvent event ->
+            let
+                enterPressed =
+                    case event.key of
+                        Just key ->
+                            case key of
+                                "Enter" ->
+                                    True
+
+                                _ ->
+                                    False
+
+                        _ ->
+                            False
+            in
+            if enterPressed then
+                update SendChatMsg model
+
+            else
+                ( model, Cmd.none )
+
 
 view : Model -> Html Msg
 view model =
@@ -391,11 +414,11 @@ view model =
             (List.map
                 (\msg -> div [] [ text (Character.getCharacter model.characterList msg.id).name, text ": ", text msg.msg ])
                 model.chatLog
-                ++ [ div []
-                        [ input [ onInput InputChat ] [] ]
-                   , button [ onClick SendChatMsg ] [ text "Send" ]
-                   ]
             )
+        , div [ class "chat-input" ]
+            [ input [ onInput InputChat, on "keydown" <| Decode.map HandleKeyboardEvent decodeKeyboardEvent, value model.chatInput ] []
+            , button [ onClick SendChatMsg ] [ text "Send" ]
+            ]
         ]
 
 

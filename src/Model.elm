@@ -4,6 +4,7 @@ import Character exposing (Character)
 import Loc exposing (Loc)
 import Structure exposing (Structure)
 import Character exposing (Direction)
+import Keyboard.Event exposing (KeyboardEvent)
 
 
 
@@ -42,3 +43,4 @@ type Msg
     | InputChat String
     | SendChatMsg
     | ReceiveChatMsg ChatMsg
+    | HandleKeyboardEvent KeyboardEvent
